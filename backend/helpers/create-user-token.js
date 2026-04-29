@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken')
 const createUserToken = async (user, req, res) => {
     const token = jwt.sign({
         name: user.name,
-        id: user._id.toString()
-    }, 'Fatec-turma6-a2026')
+        id: user._id
+    }, 'secret')
 
     res.status(201).json({
         message: 'Você está autenticado.',

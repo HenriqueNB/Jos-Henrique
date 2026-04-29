@@ -1,6 +1,8 @@
 const User = require('../models/User')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const createUserToken = require('../helpers/create-user-token')
+const getTokens = require('../helpers/get-tokens')
 
 module.exports = class UserController {
     static async register(req, res) {
@@ -83,6 +85,43 @@ module.exports = class UserController {
         }
 
         await createUserToken(user, req, res)
+    }
+
+    static async checkUser(req, res) {
+        let currentUser
+
+        console.log(req.headers.authorization)
+        if (req.headers.authorization) {
+            const token = getTokens(req)
+            const decoded = jwt.verify(token, 'secret')
+
+            currentUser = await User.findById(decoded.id)
+            currentUser.password = undefined
+        } else {
+            currentUser = null
+        }
+
+        res.status(200).json(currentUser)
+    }
+
+    static async getUserById(req, res) {
+        const id = req.params.id
+
+        const user = await User.findById(id)
+
+        if(!user) {
+            res.status(404).json({
+                massage: 'Usuário não encontrado!'
+            })
+            return
+        }
+        res.status(200).json(user)
+    }
+
+    static async editUser(req, res) {
+        res.status(200).json({
+            massage: 'Usuário editado com sucesso!'
+        })
     }
 }
 
